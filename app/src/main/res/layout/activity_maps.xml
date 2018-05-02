@@ -1,0 +1,72 @@
+<android.support.v4.widget.DrawerLayout xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.a1_keyfinder.MapsActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/drawer"
+
+   >
+<!--<FrameLayout
+    android:id="@+id/main_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+-->
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context="com.example.a1_keyfinder.MapsActivity">
+
+        <EditText
+            android:id="@+id/TFaddress"
+            android:layout_width="286dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="" />
+
+
+        <Button
+            android:id="@+id/bSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:onClick="onSearch"
+            android:text="SEARCH" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|right|end"
+            android:layout_margin="16dp"
+            android:baselineAlignBottom="true"
+            android:clickable="false"
+            android:src="@drawable/plus" />
+
+    </fragment>
+<!--</FrameLayout>-->
+
+       <android.support.design.widget.NavigationView
+               app:headerLayout="@layout/header"
+               android:id="@+id/nav_view"
+               android:layout_width="wrap_content"
+               android:layout_height="match_parent"
+               android:background="@color/white"
+               android:layout_gravity="start"
+               android:fitsSystemWindows="true"
+               app:menu="@menu/drawermenu"
+               >
+
+
+           </android.support.design.widget.NavigationView>
+
+
+
+    </android.support.v4.widget.DrawerLayout>

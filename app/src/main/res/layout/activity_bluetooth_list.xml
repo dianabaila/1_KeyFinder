@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.DrawerLayout xmlns:map="http://schemas.android.com/apk/res-auto"
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+tools:context="com.example.a1_keyfinder.BluetoothListActivity"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical"
+android:id="@+id/bluetooth"
+    android:background="@drawable/bluetooth_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable Bluetooth"
+            android:id="@+id/enableBtn"/>
+
+        <ListView
+            android:layout_below="@id/enableBtn"
+            android:layout_width="match_parent"
+            android:layout_height="174dp"
+            android:id="@+id/listViewDevices"/>
+
+    </LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>
