@@ -13,19 +13,30 @@ android:id="@+id/bluetooth"
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/enableBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable Bluetooth" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Enable Bluetooth"
-            android:id="@+id/enableBtn"/>
+            android:text="Find Devices"
+            android:id="@+id/findDevices"
+            />
 
         <ListView
             android:layout_below="@id/enableBtn"
             android:layout_width="match_parent"
             android:layout_height="174dp"
-            android:id="@+id/listViewDevices"/>
+            android:id="@+id/listViewDevices"
+            />
+
+
 
     </LinearLayout>
 

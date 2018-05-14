@@ -27,7 +27,8 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
         mViewResourceId = tvResourceId;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent)
+    {
         convertView = mLayoutInflater.inflate(mViewResourceId, null);
 
         BluetoothDevice device = mDevices.get(position);

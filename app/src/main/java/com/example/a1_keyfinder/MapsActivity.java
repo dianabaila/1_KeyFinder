@@ -2,11 +2,11 @@ package com.example.a1_keyfinder;
 
 
 import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -22,7 +22,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -50,6 +49,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener
 {
+
 
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
@@ -90,12 +90,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     {
                         case R.id.settings:
                             Toast.makeText(MapsActivity.this, "Settings",Toast.LENGTH_SHORT).show();
+                            createNotificationChannel();
+                            createNotification();
+                           return true;
                         case R.id.connect:
-                            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            enableDisableBT();
-                            makeDeviceDiscoverable();
                             newActivity();
-
+                           // break;
+                            return true;
+                        case R.id.fp:
+                            favPlacesActivity();
+                            //break;
+                            return true;
                         default:
                             return true;
 
@@ -108,112 +113,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Save current location as favorite", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                addPlaceActivity();
 
             }
         });
 
 
-    }
-BluetoothAdapter mBluetoothAdapter;
-    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state=intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,mBluetoothAdapter.ERROR);
 
-                switch (state)
-                {
-                    case BluetoothAdapter.STATE_OFF:
-                        Log.d("Maps_Activity","State OFF");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        Log.d("Maps_Activity","State turning OFF");
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        Log.d("Maps_Activity","State ON");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        Log.d("Maps_Activity","State turuing ON");
-                        break;
 
-                }
-            }
-        }
-    };
-
-    private final BroadcastReceiver mBroadcastReceiver2 = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-
-            if (action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
-
-                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-
-                switch (mode) {
-                    //Device is in Discoverable Mode
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
-                        Log.d("Maps_Activity", "mBroadcastReceiver2: Discoverability Enabled.");
-                        break;
-                    //Device not in discoverable mode
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
-                        Log.d("Maps_Activity", "mBroadcastReceiver2: Discoverability Disabled. Able to receive connections.");
-                        break;
-                    case BluetoothAdapter.SCAN_MODE_NONE:
-                        Log.d("Maps_Activity", "mBroadcastReceiver2: Discoverability Disabled. Not able to receive connections.");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTING:
-                        Log.d("Maps_Activity", "mBroadcastReceiver2: Connecting....");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTED:
-                        Log.d("Maps_Activity", "mBroadcastReceiver2: Connected.");
-                        break;
-                }
-
-            }
-        }
-    };
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(mBroadcastReceiver1);
-    }
-    public void enableDisableBT()
-    {
-        if(mBluetoothAdapter==null)
-        {
-            Log.d("Maps_activity","No BT capabilities.");
-        }
-        if(!mBluetoothAdapter.isEnabled())
-        {
-            Intent enableBTIntent=new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivity(enableBTIntent);
-
-            IntentFilter BTIntent=new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1,BTIntent);
-
-        }
-        if(mBluetoothAdapter.isEnabled())
-        {
-            mBluetoothAdapter.disable();
-            IntentFilter BTIntent=new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1,BTIntent);
-        }
-    }
-
-    public void makeDeviceDiscoverable()
-    {
-        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
-        startActivity(discoverableIntent);
-
-        IntentFilter intentFilter=new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        registerReceiver(mBroadcastReceiver2,intentFilter);
     }
 
     public void newActivity()
@@ -221,6 +130,20 @@ BluetoothAdapter mBluetoothAdapter;
         Intent btIntent = new Intent(this, BluetoothListActivity.class);
         startActivity(btIntent);
     }
+
+public void favPlacesActivity()
+{
+    Intent favPlacesIntent=new Intent(this, FavoritePlacesActivity.class);
+    startActivity(favPlacesIntent);
+}
+
+public void addPlaceActivity()
+{
+    Intent addPlaceIntent = new Intent(this,AddPlaceActivity.class);
+    addPlaceIntent.putExtra("LatLong", locationCoord);
+    startActivity(addPlaceIntent);
+}
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
@@ -315,6 +238,7 @@ BluetoothAdapter mBluetoothAdapter;
     public void onConnectionSuspended(int i) {
 
     }
+public LatLng locationCoord;
 
     @Override
     public void onLocationChanged(Location location) {
@@ -326,6 +250,10 @@ BluetoothAdapter mBluetoothAdapter;
 
         //Place current location marker
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        //get latit and longit for saving the place as favorite
+        locationCoord=latLng;
+
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("Current Position");
@@ -341,6 +269,11 @@ BluetoothAdapter mBluetoothAdapter;
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
 
+    }
+
+    public LatLng getLocationCoordinates()
+    {
+         return locationCoord;
     }
 
     @Override
@@ -413,4 +346,40 @@ BluetoothAdapter mBluetoothAdapter;
             // You can add here other case statements according to your requirement.
         }
     }
+
+private void createNotificationChannel()
+{
+    NotificationManager notificationManager =
+            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+    String channelId = "some_channel_id";
+    CharSequence channelName = "Some Channel";
+    int importance = NotificationManager.IMPORTANCE_LOW;
+    NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
+    notificationChannel.enableLights(true);
+    notificationChannel.setLightColor(R.color.RED);
+    notificationChannel.enableVibration(true);
+    notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+    notificationManager.createNotificationChannel(notificationChannel);
+
+
+
+}
+
+private void createNotification()
+{
+    NotificationManager notificationManager =
+            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    int notifyId = 1;
+    String channelId = "some_channel_id";
+
+    Notification notification = new Notification.Builder(this,channelId)
+            .setContentTitle("KeyFinder")
+            .setContentText("Don't forget your keys!")
+            .setSmallIcon(R.drawable.ic_check_black_12dp)
+            .build();
+
+    notificationManager.notify(notifyId, notification);
+}
+
 }

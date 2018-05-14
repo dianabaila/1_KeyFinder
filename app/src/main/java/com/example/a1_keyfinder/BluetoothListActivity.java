@@ -19,56 +19,13 @@ import java.util.ArrayList;
 
 public class BluetoothListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
     private Button enableBtn;
+    private Button findDevicesBtn;
     BluetoothAdapter mBluetoothAdapter;
 
     public ArrayList<BluetoothDevice>mBTDevices=new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
     ListView listViewDevices;
 
-
-
-
-
-
-    @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(mBroadcastReceiver1);
-        unregisterReceiver(mBroadcastReceiver2);
-        unregisterReceiver(mBroadcastReceiver3);
-        unregisterReceiver(mBroadcastReceiver4);
-    }
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bluetooth_list);
-        Intent intent = getIntent();
-        enableBtn=findViewById(R.id.enableBtn);
-
-        listViewDevices=(ListView) findViewById(R.id.listViewDevices);
-        mBTDevices=new ArrayList<>();
-
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver4,filter);
-
-        mBluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
-
-        listViewDevices.setOnItemClickListener(BluetoothListActivity.this);
-
-        enableBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                enableDisableBT();
-                makeDeviceDiscoverable();
-                showDevices();
-            }
-        });
-
-
-    }
 
 
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
@@ -144,7 +101,10 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
 
                 Log.d("BluetoothListActivity" , "onReceive: "+ device.getName()+" : "+ device.getAddress());
                 mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
-                
+
+                String deviceName = device.getName();
+                String deviceHardwareAddress = device.getAddress(); // MAC address
+
                 listViewDevices.setAdapter(mDeviceListAdapter);
             }
         }
@@ -164,7 +124,7 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
                     Log.d("BTActivity", "BroadcastReceiver: BOND_BONDED.");
                 }
-                //case2: creating a bone
+                //case2: creating a bond
                 if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING) {
                     Log.d("BTActivity", "BroadcastReceiver: BOND_BONDING.");
                 }
@@ -176,6 +136,72 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
         }
     };
 
+
+  /*  @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(mBroadcastReceiver1);
+        unregisterReceiver(mBroadcastReceiver2);
+        unregisterReceiver(mBroadcastReceiver3);
+        unregisterReceiver(mBroadcastReceiver4);
+    }
+*/
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        try {
+            unregisterReceiver(mBroadcastReceiver1);
+            unregisterReceiver(mBroadcastReceiver2);
+            unregisterReceiver(mBroadcastReceiver3);
+            unregisterReceiver(mBroadcastReceiver4);
+
+        } catch (IllegalArgumentException e) {
+            // ignored
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_bluetooth_list);
+       // Intent intent = getIntent();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        enableBtn=findViewById(R.id.enableBtn);
+        findDevicesBtn=findViewById(R.id.findDevices);
+
+        listViewDevices=(ListView) findViewById(R.id.listViewDevices);
+        mBTDevices=new ArrayList<>();
+
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        registerReceiver(mBroadcastReceiver4,filter);
+
+        mBluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+
+        listViewDevices.setOnItemClickListener(BluetoothListActivity.this);
+
+        enableBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                enableDisableBT();
+                makeDeviceDiscoverable();
+                //showDevices();
+            }
+        });
+        findDevicesBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+
+                showDevices();
+
+            }
+        });
+
+
+    }
 
     public void enableDisableBT()
     {
@@ -192,12 +218,13 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
             registerReceiver(mBroadcastReceiver1,BTIntent);
 
         }
-        if(mBluetoothAdapter.isEnabled())
+        /*if(mBluetoothAdapter.isEnabled())
         {
             mBluetoothAdapter.disable();
             IntentFilter BTIntent=new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             registerReceiver(mBroadcastReceiver1,BTIntent);
         }
+        */
     }
 
     public void makeDeviceDiscoverable()
@@ -218,6 +245,7 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
         {
             mBluetoothAdapter.cancelDiscovery();
             //checkBTPermissions();
+            Log.d("BtListActivity", " - CANCEL Discovery");
             mBluetoothAdapter.startDiscovery();
 
             IntentFilter discoverDevicesIntent=new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -226,10 +254,12 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
         if(!mBluetoothAdapter.isDiscovering())
         {
             //checkBTPermissions();
+            Log.d("BtListActivity - ", "isDiscovering");
             IntentFilter discoverDevicesIntent=new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
         }
     }
+
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
