@@ -62,6 +62,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private NavigationView navView;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,6 +121,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
+
 
 
 

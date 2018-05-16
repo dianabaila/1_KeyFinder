@@ -97,4 +97,8 @@
     <string name="title_activity_add_place">AddPlaceActivity</string>
     <string name="channel_name">KeyFinder</string>
     <string name="channel_description">"Do not forget your keys!"</string>
+
+    <string name="geofence_transition_entered">Entered</string>
+    <string name="geofence_transition_exited">Exited</string>
+    <string name="unknown_geofence_transition">Unknown Transition</string>
 </resources>
