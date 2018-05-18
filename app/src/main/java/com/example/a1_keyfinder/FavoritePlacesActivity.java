@@ -21,10 +21,9 @@ public class FavoritePlacesActivity extends AppCompatActivity {
         this.showFavPlaces();
     }
 
-public String x="bgg";
+    public String x = "bgg";
 
-    public void showFavPlaces()
-    {
+    public void showFavPlaces() {
         TextView fpView = (TextView) findViewById(R.id.tvFavPlaces);
        /* SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -35,10 +34,9 @@ public String x="bgg";
 */
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         Map<String, ?> allEntries = preferences.getAll();
-        String msg="";
-        for (Map.Entry<String, ?> entry : allEntries.entrySet())
-        {
-           msg+= entry.getKey() + "\n" + entry.getValue().toString() +"\n";
+        String msg = "";
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            msg += entry.getKey() + "\n" + entry.getValue().toString() + "\n";
         }
         fpView.setText(msg);
 

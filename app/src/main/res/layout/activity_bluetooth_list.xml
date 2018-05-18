@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.v4.widget.DrawerLayout xmlns:map="http://schemas.android.com/apk/res-auto"
-xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-tools:context="com.example.a1_keyfinder.BluetoothListActivity"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="vertical"
-android:id="@+id/bluetooth"
-    android:background="@drawable/bluetooth_background">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bluetooth"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bluetooth_background"
+    android:orientation="vertical"
+    tools:context="com.example.a1_keyfinder.BluetoothListActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,22 +20,13 @@ android:id="@+id/bluetooth"
             android:layout_height="wrap_content"
             android:text="Enable Bluetooth" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Find Devices"
-            android:id="@+id/findDevices"
-            />
-
         <ListView
-            android:layout_below="@id/enableBtn"
-            android:layout_width="match_parent"
-            android:layout_height="174dp"
             android:id="@+id/listViewDevices"
-            />
-
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/enableBtn" />
 
 
     </LinearLayout>
 
-</android.support.v4.widget.DrawerLayout>
+</LinearLayout>

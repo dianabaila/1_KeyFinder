@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-<item
-    android:id="@+id/fp"
-    android:title="Favorite places"
-    android:icon="@drawable/ic_location_on_black_24dp"/>
+    <item
+        android:id="@+id/fp"
+        android:icon="@drawable/ic_location_on_black_24dp"
+        android:title="Favorite places" />
     <item
         android:id="@+id/connect"
-        android:title="Connect to keys"
         android:icon="@drawable/ic_bluetooth_connected_black_24dp"
-        />
-<item
-    android:id="@+id/mk"
-    android:title="My keys"
-    android:icon="@drawable/ic_vpn_key_black_24dp"/>
-<item
-    android:id="@+id/settings"
-    android:title="Settings"
-    android:icon="@drawable/ic_settings_black_24dp"/>
+        android:title="Connect to keys" />
+    <item
+        android:id="@+id/mk"
+        android:icon="@drawable/ic_vpn_key_black_24dp"
+        android:title="My keys" />
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_black_24dp"
+        android:title="Settings" />
 </menu>

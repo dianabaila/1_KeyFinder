@@ -22,6 +22,7 @@ public class AddPlaceActivity extends AppCompatActivity {
     private GeofencingClient mGeofencingClient;
 
     private List<Geofence> mGeofenceList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,11 +30,11 @@ public class AddPlaceActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final LatLng currentLocationCoord=getIntent().getParcelableExtra("LatLong");
-        userCoord=currentLocationCoord;
+        final LatLng currentLocationCoord = getIntent().getParcelableExtra("LatLong");
+        userCoord = currentLocationCoord;
 
-       // mGeofencingClient = LocationServices.getGeofencingClient(this);
-     //   mGeofenceList=new ArrayList<Geofence>();
+        // mGeofencingClient = LocationServices.getGeofencingClient(this);
+        //   mGeofenceList=new ArrayList<Geofence>();
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -55,12 +56,11 @@ public class AddPlaceActivity extends AppCompatActivity {
     }
 */
     public void onSaveLocation(View view) {
-        EditText placeName_tf=(EditText) findViewById(R.id.tfPlaceName);
-        String placeName=placeName_tf.getText().toString();
+        EditText placeName_tf = (EditText) findViewById(R.id.tfPlaceName);
+        String placeName = placeName_tf.getText().toString();
 
-        if(placeName!=null && !(placeName.equals("")))
-        {
-          //INCERCARE StackOverflow
+        if (placeName != null && !(placeName.equals(""))) {
+            //INCERCARE StackOverflow
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor editor = preferences.edit();
 
@@ -76,9 +76,7 @@ public class AddPlaceActivity extends AppCompatActivity {
                     .setAction("Action", null).show();
             placeName_tf.setText("");
 
-            Toast.makeText(this,placeName + "  " + userCoord.toString(), Toast.LENGTH_LONG).show();
-
-
+            Toast.makeText(this, placeName + "  " + userCoord.toString(), Toast.LENGTH_LONG).show();
 
 
             //GEOFENCING
@@ -89,10 +87,8 @@ public class AddPlaceActivity extends AppCompatActivity {
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                     .build());
 */
-        }
-        else
-        {
-            Toast.makeText(this,"Field must not be empty!", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "Field must not be empty!", Toast.LENGTH_LONG).show();
 
         }
 

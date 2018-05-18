@@ -47,9 +47,7 @@ import java.util.List;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener
-{
-
+        LocationListener {
 
     private GoogleMap mMap;
     GoogleApiClient mGoogleApiClient;
@@ -60,8 +58,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DrawerLayout mDrawerlayout;
     private ActionBarDrawerToggle mToggle;
     private NavigationView navView;
-
-
 
 
     @Override
@@ -77,36 +73,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mDrawerlayout=(DrawerLayout) findViewById(R.id.drawer);
-        mToggle= new ActionBarDrawerToggle(this,mDrawerlayout, R.string.Open,R.string.Close);
+        mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer);
+        mToggle = new ActionBarDrawerToggle(this, mDrawerlayout, R.string.Open, R.string.Close);
         mDrawerlayout.addDrawerListener(mToggle);
         mToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        navView=(NavigationView) findViewById(R.id.nav_view);
+        navView = (NavigationView) findViewById(R.id.nav_view);
         navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    int id=item.getItemId();
-                    switch ((id))
-                    {
-                        case R.id.settings:
-                            Toast.makeText(MapsActivity.this, "Settings",Toast.LENGTH_SHORT).show();
-                            createNotificationChannel();
-                            createNotification();
-                           return true;
-                        case R.id.connect:
-                            newActivity();
-                           // break;
-                            return true;
-                        case R.id.fp:
-                            favPlacesActivity();
-                            //break;
-                            return true;
-                        default:
-                            return true;
+                int id = item.getItemId();
+                switch ((id)) {
+                    case R.id.settings:
+                        Toast.makeText(MapsActivity.this, "Settings", Toast.LENGTH_SHORT).show();
+                        createNotificationChannel();
+                        createNotification();
+                        return true;
+                    case R.id.connect:
+                        newActivity();
+                        // break;
+                        return true;
+                    case R.id.fp:
+                        favPlacesActivity();
+                        //break;
+                        return true;
+                    default:
+                        return true;
 
-                    }
+                }
             }
         });
 
@@ -123,65 +118,54 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
 
-
-
-
     }
 
-    public void newActivity()
-    {
+    public void newActivity() {
         Intent btIntent = new Intent(this, BluetoothListActivity.class);
         startActivity(btIntent);
     }
 
-public void favPlacesActivity()
-{
-    Intent favPlacesIntent=new Intent(this, FavoritePlacesActivity.class);
-    startActivity(favPlacesIntent);
-}
+    public void favPlacesActivity() {
+        Intent favPlacesIntent = new Intent(this, FavoritePlacesActivity.class);
+        startActivity(favPlacesIntent);
+    }
 
-public void addPlaceActivity()
-{
-    Intent addPlaceIntent = new Intent(this,AddPlaceActivity.class);
-    addPlaceIntent.putExtra("LatLong", locationCoord);
-    startActivity(addPlaceIntent);
-}
+    public void addPlaceActivity() {
+        Intent addPlaceIntent = new Intent(this, AddPlaceActivity.class);
+        addPlaceIntent.putExtra("LatLong", locationCoord);
+        startActivity(addPlaceIntent);
+    }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        if(mToggle.onOptionsItemSelected(item))
-        {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mToggle.onOptionsItemSelected(item)) {
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
 
-    public void onSearch(View view)
-    {
-        EditText location_tf=(EditText)findViewById(R.id.TFaddress);
+    public void onSearch(View view) {
+        EditText location_tf = (EditText) findViewById(R.id.TFaddress);
         String location = location_tf.getText().toString();
-        List<Address> addressList=null;
+        List<Address> addressList = null;
 
-        if(location!=null || !location.equals(""))
-        {
+        if (location != null || !location.equals("")) {
             Geocoder geocoder = new Geocoder(this);
-            try
-            {
-                addressList = geocoder.getFromLocationName(location,1);
-            }catch(IOException e)
-            {
+            try {
+                addressList = geocoder.getFromLocationName(location, 1);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            Address addresses=addressList.get(0);
-            LatLng latLng= new LatLng(addresses.getLatitude(),addresses.getLongitude());
+            Address addresses = addressList.get(0);
+            LatLng latLng = new LatLng(addresses.getLatitude(), addresses.getLongitude());
             mMap.addMarker(new MarkerOptions().position(latLng).title("Marker"));
             mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-      }
+        }
 
     }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -204,10 +188,9 @@ public void addPlaceActivity()
                 buildGoogleApiClient();
                 mMap.setMyLocationEnabled(true);
                 //location button under the search button
-                mMap.setPadding(30,150,20,10);
+                mMap.setPadding(30, 150, 20, 10);
             }
-        }
-        else {
+        } else {
             buildGoogleApiClient();
             mMap.setMyLocationEnabled(true);
         }
@@ -241,7 +224,8 @@ public void addPlaceActivity()
     public void onConnectionSuspended(int i) {
 
     }
-public LatLng locationCoord;
+
+    public LatLng locationCoord;
 
     @Override
     public void onLocationChanged(Location location) {
@@ -255,7 +239,7 @@ public LatLng locationCoord;
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         //get latit and longit for saving the place as favorite
-        locationCoord=latLng;
+        locationCoord = latLng;
 
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
@@ -274,9 +258,8 @@ public LatLng locationCoord;
 
     }
 
-    public LatLng getLocationCoordinates()
-    {
-         return locationCoord;
+    public LatLng getLocationCoordinates() {
+        return locationCoord;
     }
 
     @Override
@@ -285,7 +268,8 @@ public LatLng locationCoord;
     }
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    public boolean checkLocationPermission(){
+
+    public boolean checkLocationPermission() {
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -350,39 +334,36 @@ public LatLng locationCoord;
         }
     }
 
-private void createNotificationChannel()
-{
-    NotificationManager notificationManager =
-            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    private void createNotificationChannel() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-    String channelId = "some_channel_id";
-    CharSequence channelName = "Some Channel";
-    int importance = NotificationManager.IMPORTANCE_LOW;
-    NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
-    notificationChannel.enableLights(true);
-    notificationChannel.setLightColor(R.color.RED);
-    notificationChannel.enableVibration(true);
-    notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-    notificationManager.createNotificationChannel(notificationChannel);
-
+        String channelId = "some_channel_id";
+        CharSequence channelName = "Some Channel";
+        int importance = NotificationManager.IMPORTANCE_LOW;
+        NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
+        notificationChannel.enableLights(true);
+        notificationChannel.setLightColor(R.color.RED);
+        notificationChannel.enableVibration(true);
+        notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        notificationManager.createNotificationChannel(notificationChannel);
 
 
-}
+    }
 
-private void createNotification()
-{
-    NotificationManager notificationManager =
-            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-    int notifyId = 1;
-    String channelId = "some_channel_id";
+    private void createNotification() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        int notifyId = 1;
+        String channelId = "some_channel_id";
 
-    Notification notification = new Notification.Builder(this,channelId)
-            .setContentTitle("KeyFinder")
-            .setContentText("Don't forget your keys!")
-            .setSmallIcon(R.drawable.ic_check_black_12dp)
-            .build();
+        Notification notification = new Notification.Builder(this, channelId)
+                .setContentTitle("KeyFinder")
+                .setContentText("Don't forget your keys!")
+                .setSmallIcon(R.drawable.ic_check_black_12dp)
+                .build();
 
-    notificationManager.notify(notifyId, notification);
-}
+        notificationManager.notify(notifyId, notification);
+    }
 
 }

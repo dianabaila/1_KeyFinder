@@ -17,36 +17,33 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
-public class BluetoothListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class BluetoothListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
     private Button enableBtn;
-    private Button findDevicesBtn;
     BluetoothAdapter mBluetoothAdapter;
 
-    public ArrayList<BluetoothDevice>mBTDevices=new ArrayList<>();
+    public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
     ListView listViewDevices;
-
-
 
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state=intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,mBluetoothAdapter.ERROR);
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
-                switch (state)
-                {
+                switch (state) {
                     case BluetoothAdapter.STATE_OFF:
-                        Log.d("Maps_Activity","State OFF");
+                        Log.d("Maps_Activity", "State OFF");
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
-                        Log.d("Maps_Activity","State turning OFF");
+                        Log.d("Maps_Activity", "State turning OFF");
                         break;
                     case BluetoothAdapter.STATE_ON:
-                        Log.d("Maps_Activity","State ON");
+                        Log.d("Maps_Activity", "State ON");
+                        makeDeviceDiscoverable();
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
-                        Log.d("Maps_Activity","State turuing ON");
+                        Log.d("Maps_Activity", "State turuing ON");
                         break;
 
                 }
@@ -68,6 +65,7 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
                     //Device is in Discoverable Mode
                     case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
                         Log.d("Maps_Activity", "mBroadcastReceiver2: Discoverability Enabled.");
+                        showDevices();
                         break;
                     //Device not in discoverable mode
                     case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
@@ -95,21 +93,16 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
             final String action = intent.getAction();
             Log.d("BT_ACTIVITY", "onReceive: ACTION FOUND.");
 
-            if (action.equals(BluetoothDevice.ACTION_FOUND)){
-                BluetoothDevice device = intent.getParcelableExtra (BluetoothDevice.EXTRA_DEVICE);
+            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 mBTDevices.add(device);
 
-                Log.d("BluetoothListActivity" , "onReceive: "+ device.getName()+" : "+ device.getAddress());
-                mDeviceListAdapter = new DeviceListAdapter(context, R.layout.device_adapter_view, mBTDevices);
+                Log.d("BluetoothListActivity", "onReceive: " + device.getName() + " : " + device.getAddress());
 
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-
-                listViewDevices.setAdapter(mDeviceListAdapter);
+                mDeviceListAdapter.notifyDataSetChanged();
             }
         }
     };
-
 
 
     private final BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
@@ -117,11 +110,11 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
 
-            if(action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
+            if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
                 BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 //3 cases:
                 //case1: bonded already
-                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
+                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED) {
                     Log.d("BTActivity", "BroadcastReceiver: BOND_BONDED.");
                 }
                 //case2: creating a bond
@@ -136,29 +129,28 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
         }
     };
 
-
-  /*  @Override
-    protected void onDestroy()
-    {
-        super.onDestroy();
-        unregisterReceiver(mBroadcastReceiver1);
-        unregisterReceiver(mBroadcastReceiver2);
-        unregisterReceiver(mBroadcastReceiver3);
-        unregisterReceiver(mBroadcastReceiver4);
-    }
-*/
     @Override
-    protected void onPause()
-    {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         try {
             unregisterReceiver(mBroadcastReceiver1);
-            unregisterReceiver(mBroadcastReceiver2);
-            unregisterReceiver(mBroadcastReceiver3);
-            unregisterReceiver(mBroadcastReceiver4);
-
         } catch (IllegalArgumentException e) {
-            // ignored
+
+        }
+        try {
+            unregisterReceiver(mBroadcastReceiver2);
+        } catch (IllegalArgumentException e) {
+
+        }
+        try {
+            unregisterReceiver(mBroadcastReceiver3);
+        } catch (IllegalArgumentException e) {
+
+        }
+        try {
+            unregisterReceiver(mBroadcastReceiver4);
+        } catch (IllegalArgumentException e) {
+
         }
     }
 
@@ -166,20 +158,18 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bluetooth_list);
-       // Intent intent = getIntent();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        enableBtn=findViewById(R.id.enableBtn);
-        findDevicesBtn=findViewById(R.id.findDevices);
+        enableBtn = findViewById(R.id.enableBtn);
 
-        listViewDevices=(ListView) findViewById(R.id.listViewDevices);
-        mBTDevices=new ArrayList<>();
+        listViewDevices = findViewById(R.id.listViewDevices);
+        mBTDevices = new ArrayList<>();
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver4,filter);
+        registerReceiver(mBroadcastReceiver4, filter);
 
-        mBluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         listViewDevices.setOnItemClickListener(BluetoothListActivity.this);
 
@@ -187,76 +177,57 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
             @Override
             public void onClick(View view) {
                 enableDisableBT();
-                makeDeviceDiscoverable();
-                //showDevices();
-            }
-        });
-        findDevicesBtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-
-                showDevices();
-
             }
         });
 
+        mDeviceListAdapter = new DeviceListAdapter(this, R.layout.device_adapter_view, mBTDevices);
+        listViewDevices.setAdapter(mDeviceListAdapter);
 
     }
 
-    public void enableDisableBT()
-    {
-        if(mBluetoothAdapter==null)
-        {
-            Log.d("Maps_activity","No BT capabilities.");
+    public void enableDisableBT() {
+        if (mBluetoothAdapter == null) {
+            Log.d("Maps_activity", "No BT capabilities.");
         }
-        if(!mBluetoothAdapter.isEnabled())
-        {
-            Intent enableBTIntent=new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivity(enableBTIntent);
+        if (!mBluetoothAdapter.isEnabled()) {
+            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+            registerReceiver(mBroadcastReceiver1, BTIntent);
 
-            IntentFilter BTIntent=new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1,BTIntent);
-
+            mBluetoothAdapter.enable();
+        } else {
+            makeDeviceDiscoverable();
         }
-        /*if(mBluetoothAdapter.isEnabled())
-        {
-            mBluetoothAdapter.disable();
-            IntentFilter BTIntent=new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1,BTIntent);
-        }
-        */
     }
 
-    public void makeDeviceDiscoverable()
-    {
+    public void makeDeviceDiscoverable() {
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
         startActivity(discoverableIntent);
 
-        IntentFilter intentFilter=new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
-        registerReceiver(mBroadcastReceiver2,intentFilter);
+        IntentFilter intentFilter = new IntentFilter(mBluetoothAdapter.ACTION_SCAN_MODE_CHANGED);
+        registerReceiver(mBroadcastReceiver2, intentFilter);
     }
 
 
-
-    public void showDevices()
-    {
-        if(mBluetoothAdapter.isDiscovering())
-        {
+    public void showDevices() {
+        if (mBluetoothAdapter.isDiscovering()) {
             mBluetoothAdapter.cancelDiscovery();
-            //checkBTPermissions();
+
             Log.d("BtListActivity", " - CANCEL Discovery");
+
+            IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+            registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
+
             mBluetoothAdapter.startDiscovery();
 
-            IntentFilter discoverDevicesIntent=new IntentFilter(BluetoothDevice.ACTION_FOUND);
-            registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
-        }
-        if(!mBluetoothAdapter.isDiscovering())
-        {
+        } else {
+
             //checkBTPermissions();
             Log.d("BtListActivity - ", "isDiscovering");
-            IntentFilter discoverDevicesIntent=new IntentFilter(BluetoothDevice.ACTION_FOUND);
+            IntentFilter discoverDevicesIntent = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
+
+            mBluetoothAdapter.startDiscovery();
         }
     }
 
@@ -265,13 +236,12 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         mBluetoothAdapter.cancelDiscovery();
         Log.d("BTActivity", "onItemClick: you clicked a device");
-        String deviceName=mBTDevices.get(i).getName();
+        String deviceName = mBTDevices.get(i).getName();
         String deviceAddress = mBTDevices.get(i).getAddress();
 
-        Log.d("BTActivity","onItem click: " + deviceName + deviceAddress);
+        Log.d("BTActivity", "onItem click: " + deviceName + deviceAddress);
 
-        if(Build.VERSION.SDK_INT>Build.VERSION_CODES.JELLY_BEAN_MR2)
-        {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Log.d("BTActivity", "PAIRING with ----->" + deviceName);
             mBTDevices.get(i).createBond();
         }
@@ -292,4 +262,5 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
         }
     }
     */
+
 }
