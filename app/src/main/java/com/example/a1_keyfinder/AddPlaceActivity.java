@@ -1,5 +1,6 @@
 package com.example.a1_keyfinder;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -22,6 +23,9 @@ public class AddPlaceActivity extends AppCompatActivity {
     private GeofencingClient mGeofencingClient;
 
     private List<Geofence> mGeofenceList;
+    public double latitudine;
+    public double longitudine ;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,28 +37,15 @@ public class AddPlaceActivity extends AppCompatActivity {
         final LatLng currentLocationCoord = getIntent().getParcelableExtra("LatLong");
         userCoord = currentLocationCoord;
 
-        // mGeofencingClient = LocationServices.getGeofencingClient(this);
-        //   mGeofenceList=new ArrayList<Geofence>();
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+
     }
 
 
-    /*private PendingIntent getGeofencePendingIntent() {
-        // Reuse the PendingIntent if we already have it.
-       // if (mGeofencePendingIntent != null) {
-         //   return mGeofencePendingIntent;
-        //}
-        Intent intent = new Intent(this, GeoFenceTransitionsIntentService.class);
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-       PendingIntent mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
-        return mGeofencePendingIntent;
-    }
-*/
     public void onSaveLocation(View view) {
         EditText placeName_tf = (EditText) findViewById(R.id.tfPlaceName);
         String placeName = placeName_tf.getText().toString();
@@ -79,14 +70,15 @@ public class AddPlaceActivity extends AppCompatActivity {
             Toast.makeText(this, placeName + "  " + userCoord.toString(), Toast.LENGTH_LONG).show();
 
 
-            //GEOFENCING
 
-           /* mGeofenceList.add(new Geofence.Builder()
-            .setRequestId(placeName)
-            .setCircularRegion(userCoord.latitude,userCoord.longitude, 20)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build());
-*/
+            splitLocation(userCoord.toString());
+
+            Intent data=new Intent();
+            data.putExtra("latit", latitudine);
+            data.putExtra("longit",longitudine);
+            setResult(2,data);
+            finish();
+
         } else {
             Toast.makeText(this, "Field must not be empty!", Toast.LENGTH_LONG).show();
 
@@ -99,37 +91,19 @@ public class AddPlaceActivity extends AppCompatActivity {
         Log.d("AddPlaceActivity ---->",name + " ------> " + crd);
         //END debugging checks
         */
+
     }
 
 
-   /* private GeofencingRequest getGeofencingRequest() {
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-        builder.addGeofences(mGeofenceList);
-        return builder.build();
-    }
-
-    @SuppressLint("MissingPermission")
-    private void addGeoF()
+    private void splitLocation(String location)
     {
-        mGeofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
-                .addOnSuccessListener(this, new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Geofences added
-                        // ...
-                        Log.d("GEOFENCE", "ADDED");
-                    }
-                })
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Failed to add geofences
-                        // ...
-
-                        Log.d("GEOFENCE", "ERROR!!!!");
-                    }
-                });
+        String[] myData= location.split(":");
+        String[] myData_1=myData[1].split("\\(");
+        String[] myData_2=myData_1[1].split("\\)");
+        String[] myLocation=myData_2[0].split(",");
+        latitudine=Double.parseDouble(myLocation[0]);
+        longitudine=Double.parseDouble(myLocation[1]);
     }
-    */
+
+
 }

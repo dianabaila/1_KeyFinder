@@ -5,6 +5,7 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -29,6 +30,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -40,6 +44,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,6 +65,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ActionBarDrawerToggle mToggle;
     private NavigationView navView;
 
+    private GeofencingClient geofencingClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +79,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        geofencingClient = LocationServices.getGeofencingClient(this);
+
 
         mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer);
         mToggle = new ActionBarDrawerToggle(this, mDrawerlayout, R.string.Open, R.string.Close);
@@ -127,14 +137,99 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void favPlacesActivity() {
         Intent favPlacesIntent = new Intent(this, FavoritePlacesActivity.class);
-        startActivity(favPlacesIntent);
+        //startActivity(favPlacesIntent);
+        startActivityForResult(favPlacesIntent, 1);
+        mDrawerlayout.closeDrawers();
     }
 
     public void addPlaceActivity() {
         Intent addPlaceIntent = new Intent(this, AddPlaceActivity.class);
         addPlaceIntent.putExtra("LatLong", locationCoord);
-        startActivity(addPlaceIntent);
+        //startActivity(addPlaceIntent);
+
+        startActivityForResult(addPlaceIntent,2);
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == 1) {
+                double favPlaceLatit = data.getDoubleExtra("latit", 0);
+                double favPlaceLongit = data.getDoubleExtra("longit", 0);
+                LatLng favLocation = new LatLng(favPlaceLatit, favPlaceLongit);
+                mMap.addMarker(new MarkerOptions().position(favLocation).title("MarkerFav"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(favLocation));
+            }
+        }
+
+        if (requestCode == 2) {
+            if (resultCode == 2) {
+                double favPlaceLatit = data.getDoubleExtra("latit", 0);
+                double favPlaceLongit = data.getDoubleExtra("longit", 0);
+                LatLng favLocation = new LatLng(favPlaceLatit, favPlaceLongit);
+
+                addGeofecnce(favPlaceLatit, favPlaceLongit);
+            }
+        }
+
+    }
+
+    private void addGeofecnce(double favPlaceLatit, double favPlaceLongit) {
+
+        if (isLocationAccessPermitted()) {
+            requestLocationAccessPermission();
+        } else {
+            String key = "" + favPlaceLatit + "-" + favPlaceLongit;
+
+            Geofence geofence = getGeofence(favPlaceLatit, favPlaceLongit, key);
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            geofencingClient.addGeofences(getGeofencingRequest(geofence),
+                    getGeofencePendingIntent())
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                        }
+                    });
+        }
+
+    }
+    private Geofence getGeofence(double lat, double lang, String key) {
+        return new Geofence.Builder()
+                .setRequestId(key)
+                .setCircularRegion(lat, lang, 100 )
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setLoiteringDelay(10000)
+                .build();
+    }
+
+    private GeofencingRequest getGeofencingRequest(Geofence geofence) {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT);
+        builder.addGeofence(geofence);
+        return builder.build();
+    }
+
+
+    private PendingIntent getGeofencePendingIntent() {
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        return PendingIntent.getService(this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -364,6 +459,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build();
 
         notificationManager.notify(notifyId, notification);
+    }
+
+
+    private boolean isLocationAccessPermitted(){
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+    private void requestLocationAccessPermission(){
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                1);
     }
 
 }
