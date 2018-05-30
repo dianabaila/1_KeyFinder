@@ -12,7 +12,6 @@ import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingEvent;
@@ -27,17 +26,22 @@ import java.util.Locale;
 
 public class GeofenceTransitionsIntentService extends IntentService {
 
-    private static final String TAG = "GeofenceTransitionsIntentService" ;
-    private GoogleApiClient mGoogleApiClient;
+    private static final String TAG = "GeofenceTransitionsIntentService";
 
     public GeofenceTransitionsIntentService() {
         super(TAG);
     }
 
     @Override
+    public void onCreate()
+
+    {
+        super.onCreate();
+    }
+    @Override
     protected void onHandleIntent(Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-
+        Log.d("GTIS","!!!!!!!!!!!!!!!!!!!!!!BLABLABLABLA!!!!!!!!!!!!!!!!!!!!");
         if (geofencingEvent.hasError()) {
             Log.e(TAG, "" + getErrorString(geofencingEvent.getErrorCode()));
             return;
@@ -47,7 +51,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT ) {
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
@@ -57,9 +61,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
             String transitionType = getTransitionString(geofenceTransition);
 
 
-            notifyLocationAlert(transitionType, transitionDetails);
-          //  createNotificationChannel();
-            //createNotification();
+
+            //notifyLocationAlert(transitionType, transitionDetails);
+            Log.i(TAG,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + transitionDetails + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            createNotificationChannel();
+            createNotification();
         }
     }
 

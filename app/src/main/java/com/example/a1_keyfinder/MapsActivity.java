@@ -2,6 +2,7 @@ package com.example.a1_keyfinder;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,6 +24,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -41,6 +43,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -157,7 +160,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 double favPlaceLatit = data.getDoubleExtra("latit", 0);
                 double favPlaceLongit = data.getDoubleExtra("longit", 0);
                 LatLng favLocation = new LatLng(favPlaceLatit, favPlaceLongit);
-                mMap.addMarker(new MarkerOptions().position(favLocation).title("MarkerFav"));
+                //mMap.addMarker(new MarkerOptions().position(favLocation).title("MarkerFav"));
+                mMap.addCircle(new CircleOptions()
+                .center(favLocation)
+                .radius(10)
+                .strokeColor(R.color.RED)
+                .fillColor(R.color.RED));
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(favLocation));
             }
         }
@@ -174,6 +182,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    @SuppressLint("MissingPermission")
     private void addGeofecnce(double favPlaceLatit, double favPlaceLongit) {
 
         if (isLocationAccessPermitted()) {
@@ -183,7 +192,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             Geofence geofence = getGeofence(favPlaceLatit, favPlaceLongit, key);
 
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+          /*  if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -193,12 +202,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
+            */
             geofencingClient.addGeofences(getGeofencingRequest(geofence),
                     getGeofencePendingIntent())
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-
+                            if (task.isSuccessful()) {
+                                Toast.makeText(MapsActivity.this,
+                                        "Geofence has been added",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
         }
@@ -207,7 +221,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Geofence getGeofence(double lat, double lang, String key) {
         return new Geofence.Builder()
                 .setRequestId(key)
-                .setCircularRegion(lat, lang, 100 )
+                .setCircularRegion(lat, lang, 10 )
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
                 .setLoiteringDelay(10000)
@@ -217,14 +231,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GeofencingRequest getGeofencingRequest(Geofence geofence) {
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
 
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT);
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER | GeofencingRequest.INITIAL_TRIGGER_EXIT);
+
         builder.addGeofence(geofence);
+        Log.d("MAPS","!!!!!!!!!!!!!!!!!!!!!!!!!!" + builder.toString());
         return builder.build();
     }
 
 
     private PendingIntent getGeofencePendingIntent() {
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+
         return PendingIntent.getService(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
@@ -306,7 +323,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(1000);
         mLocationRequest.setFastestInterval(1000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {

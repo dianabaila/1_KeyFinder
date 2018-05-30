@@ -79,7 +79,7 @@ public class FavoritePlacesActivity extends AppCompatActivity {
         }
 
          adapter=new ArrayAdapter<String>(this, R.layout.favorite_places_list_view,R.id.tvPlaceName,favPlacesList);
-        listView.setAdapter(adapter);
+         listView.setAdapter(adapter);
 
 
     }
