@@ -72,8 +72,15 @@
                 android:value="com.example.a1_keyfinder.MapsActivity" />
         </activity>
 
-        <service android:name=".GeofenceTransitionsIntentService" android:allowBackup="true"></service>
 
+        <receiver
+            android:name="com.example.a1_keyfinder.GeofenceTransitionsBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.placer.action.TRIGGER_FIRED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

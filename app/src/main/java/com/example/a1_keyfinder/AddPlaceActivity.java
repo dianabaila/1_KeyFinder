@@ -57,7 +57,7 @@ public class AddPlaceActivity extends AppCompatActivity {
 
             //Next 2 rows -> clear SharedPref file if needed.
             //editor.clear();
-           // editor.apply();
+            //editor.apply();
 
             editor.putString(placeName, userCoord.toString());
             editor.apply();

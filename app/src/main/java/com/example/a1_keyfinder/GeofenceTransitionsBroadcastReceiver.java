@@ -1,9 +1,9 @@
 package com.example.a1_keyfinder;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -21,27 +21,17 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by Diana B on 5/17/2018.
+ * Created by Diana B on 5/30/2018.
  */
 
-public class GeofenceTransitionsIntentService extends IntentService {
+public class GeofenceTransitionsBroadcastReceiver extends BroadcastReceiver {
 
-    private static final String TAG = "GeofenceTransitionsIntentService";
-
-    public GeofenceTransitionsIntentService() {
-        super(TAG);
-    }
+    private static final String TAG = "GeofenceTransitionsBroadcastService";
 
     @Override
-    public void onCreate()
-
-    {
-        super.onCreate();
-    }
-    @Override
-    protected void onHandleIntent(Intent intent) {
+    public void onReceive(Context context, Intent intent) {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        Log.d("GTIS","!!!!!!!!!!!!!!!!!!!!!!BLABLABLABLA!!!!!!!!!!!!!!!!!!!!");
+        Log.d("GTBR", "!!!!!!!!!!!!!!!!!!!!!!BLABLABLABLA!!!!!!!!!!!!!!!!!!!!");
         if (geofencingEvent.hasError()) {
             Log.e(TAG, "" + getErrorString(geofencingEvent.getErrorCode()));
             return;
@@ -51,22 +41,20 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
-        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER || geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
             String transitionDetails = getGeofenceTransitionInfo(
-                    triggeringGeofences);
+                    triggeringGeofences, context);
 
             String transitionType = getTransitionString(geofenceTransition);
 
 
-
             //notifyLocationAlert(transitionType, transitionDetails);
-            Log.i(TAG,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + transitionDetails + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            createNotificationChannel();
-            createNotification();
+            Log.i(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + transitionDetails + transitionType + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            createNotificationChannel(context);
+            createNotification(context,transitionDetails + transitionType);
         }
     }
 
@@ -83,17 +71,17 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
     }
 
-    private String getGeofenceTransitionInfo(List<Geofence> triggeringGeofences) {
+    private String getGeofenceTransitionInfo(List<Geofence> triggeringGeofences, Context context) {
         ArrayList<String> locationNames = new ArrayList<>();
         for (Geofence geofence : triggeringGeofences) {
-            locationNames.add(getLocationName(geofence.getRequestId()));
+            locationNames.add(getLocationName(geofence.getRequestId(), context));
         }
         String triggeringLocationsString = TextUtils.join(", ", locationNames);
 
         return triggeringLocationsString;
     }
 
-    private String getLocationName(String key) {
+    private String getLocationName(String key, Context context) {
         String[] strs = key.split("-");
 
         String locationName = null;
@@ -101,7 +89,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             double lat = Double.parseDouble(strs[0]);
             double lng = Double.parseDouble(strs[1]);
 
-            locationName = getLocationNameGeocoder(lat, lng);
+            locationName = getLocationNameGeocoder(lat, lng, context);
         }
         if (locationName != null) {
             return locationName;
@@ -110,8 +98,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         }
     }
 
-    private String getLocationNameGeocoder(double lat, double lng) {
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+    private String getLocationNameGeocoder(double lat, double lng, Context context) {
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         List<Address> addresses = null;
 
         try {
@@ -149,10 +137,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
     }
 
 
-    private void createNotificationChannel()
-    {
+    private void createNotificationChannel(Context context) {
         NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         String channelId = "some_channel_id";
         CharSequence channelName = "Some Channel";
@@ -165,16 +152,15 @@ public class GeofenceTransitionsIntentService extends IntentService {
         notificationManager.createNotificationChannel(notificationChannel);
     }
 
-    private void createNotification()
-    {
+    private void createNotification(Context context, String details) {
         NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         int notifyId = 1;
         String channelId = "some_channel_id";
 
-        Notification notification = new Notification.Builder(this,channelId)
+        Notification notification = new Notification.Builder(context, channelId)
                 .setContentTitle("KeyFinder")
-                .setContentText("Are you leaving? Don't forget your keys!")
+                .setContentText(details)
                 .setSmallIcon(R.drawable.ic_check_black_12dp)
                 .build();
 
@@ -182,11 +168,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
     }
 
 
-    private void notifyLocationAlert(String locTransitionType, String locationDetails) {
+    private void notifyLocationAlert(String locTransitionType, String locationDetails, Context context) {
 
         String CHANNEL_ID = "Second_notification";
         NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this, CHANNEL_ID)
+                new NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_check_black_12dp)
                         .setContentTitle(locTransitionType)
                         .setContentText(locationDetails);
@@ -194,9 +180,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
         builder.setAutoCancel(true);
 
         NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         mNotificationManager.notify(0, builder.build());
     }
-
 }

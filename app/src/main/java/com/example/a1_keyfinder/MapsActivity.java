@@ -160,7 +160,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 double favPlaceLatit = data.getDoubleExtra("latit", 0);
                 double favPlaceLongit = data.getDoubleExtra("longit", 0);
                 LatLng favLocation = new LatLng(favPlaceLatit, favPlaceLongit);
-                //mMap.addMarker(new MarkerOptions().position(favLocation).title("MarkerFav"));
+                mMap.addMarker(new MarkerOptions().position(favLocation).title("MarkerFav"));
                 mMap.addCircle(new CircleOptions()
                 .center(favLocation)
                 .radius(10)
@@ -223,7 +223,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setRequestId(key)
                 .setCircularRegion(lat, lang, 10 )
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .setLoiteringDelay(10000)
                 .build();
     }
@@ -240,10 +240,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private PendingIntent getGeofencePendingIntent() {
-        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
 
-        return PendingIntent.getService(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent intent = new Intent(this, GeofenceTransitionsBroadcastReceiver.class);
+        return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+
+       // return PendingIntent.getService(this, 0, intent,
+          //      PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
 
@@ -321,7 +326,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onConnected(Bundle bundle) {
 
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000);
+        mLocationRequest.setInterval(10000);
         mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         if (ContextCompat.checkSelfPermission(this,
