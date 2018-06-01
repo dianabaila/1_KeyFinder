@@ -37,11 +37,7 @@ public class AddPlaceActivity extends AppCompatActivity {
         final LatLng currentLocationCoord = getIntent().getParcelableExtra("LatLong");
         userCoord = currentLocationCoord;
 
-
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
 
     }
 

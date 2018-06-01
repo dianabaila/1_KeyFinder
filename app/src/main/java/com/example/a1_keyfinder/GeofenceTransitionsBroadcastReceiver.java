@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -54,7 +53,7 @@ public class GeofenceTransitionsBroadcastReceiver extends BroadcastReceiver {
             //notifyLocationAlert(transitionType, transitionDetails);
             Log.i(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + transitionDetails + transitionType + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             createNotificationChannel(context);
-            createNotification(context,transitionDetails + transitionType);
+            createNotification(context, transitionType);
         }
     }
 
@@ -167,21 +166,4 @@ public class GeofenceTransitionsBroadcastReceiver extends BroadcastReceiver {
         notificationManager.notify(notifyId, notification);
     }
 
-
-    private void notifyLocationAlert(String locTransitionType, String locationDetails, Context context) {
-
-        String CHANNEL_ID = "Second_notification";
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_check_black_12dp)
-                        .setContentTitle(locTransitionType)
-                        .setContentText(locationDetails);
-
-        builder.setAutoCancel(true);
-
-        NotificationManager mNotificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        mNotificationManager.notify(0, builder.build());
-    }
 }

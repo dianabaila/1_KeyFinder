@@ -242,8 +242,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PendingIntent getGeofencePendingIntent() {
 
 
-        Intent intent = new Intent(this, GeofenceTransitionsBroadcastReceiver.class);
+        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
         return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+       // Intent intent = new Intent(this, GeofenceTransitionsBroadcastReceiver.class);
+        //return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
 
@@ -366,14 +369,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //move map camera
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
         //stop location updates
         if (mGoogleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
         }
 
-    }
+     }
 
     public LatLng getLocationCoordinates() {
         return locationCoord;
