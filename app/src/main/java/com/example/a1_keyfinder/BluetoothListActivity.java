@@ -1,7 +1,11 @@
 package com.example.a1_keyfinder;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,15 +19,22 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class BluetoothListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+
+    private static final UUID uuid =
+            UUID.fromString("5fce337d-17e2-4ece-e47b-88aaa5359259");
+
     private Button enableBtn;
     BluetoothAdapter mBluetoothAdapter;
 
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
     public DeviceListAdapter mDeviceListAdapter;
     ListView listViewDevices;
+
 
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -228,6 +239,7 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
             registerReceiver(mBroadcastReceiver3, discoverDevicesIntent);
 
             mBluetoothAdapter.startDiscovery();
+
         }
     }
 
@@ -241,12 +253,113 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
 
         Log.d("BTActivity", "onItem click: " + deviceName + deviceAddress);
 
+        BluetoothDevice bluetoothDevice = mBluetoothAdapter.getRemoteDevice(deviceAddress);
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Log.d("BTActivity", "PAIRING with ----->" + deviceName);
-            mBTDevices.get(i).createBond();
+           // mBTDevices.get(i).createBond();
+
+            ConnectingThread t = new ConnectingThread(bluetoothDevice);
+            t.start();
+
         }
     }
 
 
 
+    private class ConnectingThread extends Thread {
+        private final BluetoothSocket bluetoothSocket;
+        private final BluetoothDevice bluetoothDevice;
+
+        public ConnectingThread(BluetoothDevice device) {
+
+            BluetoothSocket temp = null;
+            bluetoothDevice = device;
+
+            // Get a BluetoothSocket to connect with the given BluetoothDevice
+            try {
+                temp = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            bluetoothSocket = temp;
+        }
+
+        public void run() {
+            // Cancel discovery as it will slow down the connection
+            mBluetoothAdapter.cancelDiscovery();
+
+            try {
+                // This will block until it succeeds in connecting to the device
+                // through the bluetoothSocket or throws an exception
+                bluetoothSocket.connect();
+            } catch (IOException connectException) {
+                connectException.printStackTrace();
+                try {
+                    bluetoothSocket.close();
+                } catch (IOException closeException) {
+                    closeException.printStackTrace();
+                }
+            }
+
+          //  while(bluetoothSocket.isConnected())
+          //  {
+
+           // }
+
+           // createNotificationChannel();
+          //  createNotification();
+            // Code to manage the connection in a separate thread
+            /*
+               manageBluetoothConnection(bluetoothSocket);
+            */
+        }
+
+
+        // Cancel an open connection and terminate the thread
+        public void cancel() {
+            try {
+                bluetoothSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void createNotificationChannel() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        String channelId = "some_channel_id";
+        CharSequence channelName = "Some Channel";
+        int importance = NotificationManager.IMPORTANCE_LOW;
+        NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
+        notificationChannel.enableLights(true);
+        notificationChannel.setLightColor(R.color.RED);
+        notificationChannel.enableVibration(true);
+        notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
+        notificationManager.createNotificationChannel(notificationChannel);
+
+
+    }
+
+    private void createNotification() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        int notifyId = 1;
+        String channelId = "some_channel_id";
+
+        Notification notification = new Notification.Builder(this, channelId)
+                .setContentTitle("KeyFinder")
+                .setContentText("Don't forget your keys!")
+                .setSmallIcon(R.drawable.ic_check_black_12dp)
+                .build();
+
+        notificationManager.notify(notifyId, notification);
+    }
+
+
 }
+
+
