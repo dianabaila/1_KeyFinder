@@ -85,6 +85,17 @@
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
+
+        <receiver
+            android:name=".BluetoothBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

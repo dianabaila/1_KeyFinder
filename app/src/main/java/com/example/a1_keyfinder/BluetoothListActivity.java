@@ -1,8 +1,6 @@
 package com.example.a1_keyfinder;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -193,7 +191,6 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
 
         mDeviceListAdapter = new DeviceListAdapter(this, R.layout.device_adapter_view, mBTDevices);
         listViewDevices.setAdapter(mDeviceListAdapter);
-
     }
 
     public void enableDisableBT() {
@@ -259,6 +256,9 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
             Log.d("BTActivity", "PAIRING with ----->" + deviceName);
            // mBTDevices.get(i).createBond();
 
+            Intent intent = new Intent(getApplicationContext(), BluetoothBroadcastReceiver.class);
+            PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
             ConnectingThread t = new ConnectingThread(bluetoothDevice);
             t.start();
 
@@ -302,13 +302,10 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
                 }
             }
 
-          //  while(bluetoothSocket.isConnected())
-          //  {
 
-           // }
+            //Intent intent = new Intent(getApplicationContext(), BluetoothBroadcastReceiver.class);
+           // PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-           // createNotificationChannel();
-          //  createNotification();
             // Code to manage the connection in a separate thread
             /*
                manageBluetoothConnection(bluetoothSocket);
@@ -326,39 +323,6 @@ public class BluetoothListActivity extends AppCompatActivity implements AdapterV
         }
 
     }
-
-    private void createNotificationChannel() {
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        String channelId = "some_channel_id";
-        CharSequence channelName = "Some Channel";
-        int importance = NotificationManager.IMPORTANCE_LOW;
-        NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
-        notificationChannel.enableLights(true);
-        notificationChannel.setLightColor(R.color.RED);
-        notificationChannel.enableVibration(true);
-        notificationChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-        notificationManager.createNotificationChannel(notificationChannel);
-
-
-    }
-
-    private void createNotification() {
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int notifyId = 1;
-        String channelId = "some_channel_id";
-
-        Notification notification = new Notification.Builder(this, channelId)
-                .setContentTitle("KeyFinder")
-                .setContentText("Don't forget your keys!")
-                .setSmallIcon(R.drawable.ic_check_black_12dp)
-                .build();
-
-        notificationManager.notify(notifyId, notification);
-    }
-
 
 }
 
