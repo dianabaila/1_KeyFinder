@@ -62,10 +62,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             String transitionType = getTransitionString(geofenceTransition);
 
 
-            //notifyLocationAlert(transitionType, transitionDetails);
+
             Log.i(TAG, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + transitionDetails + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            //createNotificationChannel();
-            //createNotification();
         sendNotification(transitionType, transitionDetails);
         }
     }
@@ -141,11 +139,11 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE:
                 return "Geofence not available";
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
-                return "geofence too many_geofences";
+                return "Geofence too many_geofences";
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
-                return "geofence too many pending_intents";
+                return "Geofence too many pending_intents";
             default:
-                return "geofence error";
+                return "Geofence error";
         }
     }
 
@@ -155,14 +153,13 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Android O requires a Notification Channel.
+        // Notification Channel for Android Oreo.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString(R.string.app_name);
             // Create the channel for the notification
             NotificationChannel mChannel =
                     new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
 
-            // Set the Notification Channel for the Notification Manager.
             mNotificationManager.createNotificationChannel(mChannel);
         }
 

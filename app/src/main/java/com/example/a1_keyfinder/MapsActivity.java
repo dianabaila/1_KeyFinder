@@ -70,6 +70,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GeofencingClient geofencingClient;
 
+    Context mContext;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +86,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         geofencingClient = LocationServices.getGeofencingClient(this);
 
+        mContext=this;
 
         mDrawerlayout = (DrawerLayout) findViewById(R.id.drawer);
         mToggle = new ActionBarDrawerToggle(this, mDrawerlayout, R.string.Open, R.string.Close);
@@ -140,7 +142,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void favPlacesActivity() {
         Intent favPlacesIntent = new Intent(this, FavoritePlacesActivity.class);
-        //startActivity(favPlacesIntent);
         startActivityForResult(favPlacesIntent, 1);
         mDrawerlayout.closeDrawers();
     }
@@ -148,7 +149,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void addPlaceActivity() {
         Intent addPlaceIntent = new Intent(this, AddPlaceActivity.class);
         addPlaceIntent.putExtra("LatLong", locationCoord);
-        //startActivity(addPlaceIntent);
 
         startActivityForResult(addPlaceIntent,2);
     }
@@ -239,10 +239,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
+
     private PendingIntent getGeofencePendingIntent() {
 
 
-        Intent intent = new Intent(this, GeofenceBroadcastReceiver.class);
+        Intent intent = new Intent(mContext, GeofenceBroadcastReceiver.class);
+
         return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
        // Intent intent = new Intent(this, GeofenceTransitionsBroadcastReceiver.class);
@@ -280,20 +282,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             Address addresses = addressList.get(0);
             LatLng latLng = new LatLng(addresses.getLatitude(), addresses.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(latLng).title("Marker"));
+            mMap.addMarker(new MarkerOptions().position(latLng).title("Searched place"));
             mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         }
 
     }
 
     /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     * @param googleMap
+     * Method used for manipulating the map when it's available
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -336,7 +333,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
+          }
 
     }
 
@@ -379,7 +376,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      }
 
     public LatLng getLocationCoordinates() {
-        return locationCoord;
+       return locationCoord;
     }
 
     @Override
@@ -398,18 +395,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.ACCESS_FINE_LOCATION)) {
 
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
 
-                //Prompt the user once explanation has been shown
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
 
 
             } else {
-                // No explanation needed, we can request the permission.
+
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_LOCATION);
@@ -444,13 +437,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } else {
 
                     // Permission denied, Disable the functionality that depends on this permission.
-                    Toast.makeText(this, "permission denied", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Permission denied.", Toast.LENGTH_LONG).show();
                 }
                 return;
             }
 
-            // other 'case' lines to check for other permissions this app might request.
-            // You can add here other case statements according to your requirement.
         }
     }
 
